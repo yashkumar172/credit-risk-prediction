@@ -105,7 +105,7 @@ def split_data(df: pd.DataFrame, random_state: int = config.RANDOM_STATE) -> Dat
     return DataSplit(train=train, validation=validation, test=test)
 
 
-def _index_hash(index: pd.Index) -> str:
+def index_hash(index: pd.Index) -> str:
     """Hash of the sorted row IDs in a split, used to confirm the split is reproduced exactly."""
     ids = ",".join(map(str, sorted(index)))
     return hashlib.sha256(ids.encode()).hexdigest()
@@ -127,7 +127,7 @@ def split_summary(split: DataSplit, data_sha256: str) -> dict:
             "rows": len(part),
             "defaults": int(part[config.TARGET].sum()),
             "default_rate": round(float(part[config.TARGET].mean()), 5),
-            "row_id_sha256": _index_hash(part.index),
+            "row_id_sha256": index_hash(part.index),
         }
         if name != "train":
             # Identical feature profiles also present in train (informational; see DECISIONS.md)

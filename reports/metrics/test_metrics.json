@@ -1,0 +1,226 @@
+{
+  "evaluated_at_utc": "2026-10-10T21:57:49+00:00",
+  "command": "python -m src.evaluate --final",
+  "forced_rerun": false,
+  "artifact": "credit_risk_pipeline.joblib",
+  "model": "random_forest",
+  "model_configuration": "tuned",
+  "calibration_method": "isotonic",
+  "decision_threshold": 0.17,
+  "cost_false_negative": 5.0,
+  "cost_false_positive": 1.0,
+  "data_sha256": "1bd46da486a5708c58c7b01a034fae2a13b327f6f7b62ea7ba4fe3b5824b24ac",
+  "test_split": {
+    "rows": 22500,
+    "defaults": 1504,
+    "default_rate": 0.06684444444444444,
+    "row_id_sha256": "729d63cf3f7f18d3eed7564c0a12249cf03f28465b6784538816cab83a618005",
+    "matches_recorded_split": true
+  },
+  "raw": {
+    "pr_auc": 0.41071882769504686,
+    "roc_auc": 0.8700631268924576,
+    "brier": 0.04849612915578857,
+    "mean_predicted": 0.06696190994486514,
+    "observed_rate": 0.06684444444444444
+  },
+  "calibrated": {
+    "pr_auc": 0.39194951899446656,
+    "roc_auc": 0.8694897844016894,
+    "brier": 0.0486458776376923,
+    "mean_predicted": 0.06644090158569331,
+    "observed_rate": 0.06684444444444444
+  },
+  "at_threshold": {
+    "threshold": 0.17,
+    "tp": 934,
+    "fp": 1863,
+    "fn": 570,
+    "tn": 19133,
+    "precision": 0.3339292098677154,
+    "recall": 0.6210106382978723,
+    "f1": 0.4343176005580097,
+    "flagged_rate": 0.12431111111111111,
+    "cost": 4713.0
+  },
+  "bootstrap": {
+    "method": "percentile bootstrap, rows resampled with replacement (paired across score sets)",
+    "resamples": 1000,
+    "skipped_single_class": 0,
+    "level": 0.95,
+    "random_state": 42,
+    "calibrated": {
+      "pr_auc": {
+        "lower": 0.36697963788046606,
+        "upper": 0.41846684755361374,
+        "std": 0.013182634929780428
+      },
+      "roc_auc": {
+        "lower": 0.8596813513541418,
+        "upper": 0.8793593692725541,
+        "std": 0.004994485874838787
+      },
+      "brier": {
+        "lower": 0.04659106419417804,
+        "upper": 0.050693461289329105,
+        "std": 0.0010738028198749635
+      }
+    },
+    "raw": {
+      "pr_auc": {
+        "lower": 0.3843752219011757,
+        "upper": 0.4397462391127983,
+        "std": 0.013870800101247326
+      },
+      "roc_auc": {
+        "lower": 0.8602684717827801,
+        "upper": 0.8797761869934241,
+        "std": 0.004987167656734052
+      },
+      "brier": {
+        "lower": 0.04648656141390307,
+        "upper": 0.050574383560170376,
+        "std": 0.0010612431906348663
+      }
+    }
+  },
+  "calibration_curve": {
+    "bins": 10,
+    "strategy": "quantile",
+    "raw": [
+      {
+        "mean_predicted": 0.0029771722059661124,
+        "observed_rate": 0.0017777777777777779
+      },
+      {
+        "mean_predicted": 0.005900746457334007,
+        "observed_rate": 0.0071111111111111115
+      },
+      {
+        "mean_predicted": 0.008908008007239709,
+        "observed_rate": 0.006666666666666667
+      },
+      {
+        "mean_predicted": 0.012783418425158349,
+        "observed_rate": 0.013777777777777778
+      },
+      {
+        "mean_predicted": 0.018542998671574665,
+        "observed_rate": 0.01911111111111111
+      },
+      {
+        "mean_predicted": 0.027884914721020275,
+        "observed_rate": 0.025333333333333333
+      },
+      {
+        "mean_predicted": 0.04237559374202147,
+        "observed_rate": 0.03688888888888889
+      },
+      {
+        "mean_predicted": 0.06777440479540271,
+        "observed_rate": 0.06133333333333333
+      },
+      {
+        "mean_predicted": 0.12186977454800695,
+        "observed_rate": 0.12355555555555556
+      },
+      {
+        "mean_predicted": 0.36060206787492727,
+        "observed_rate": 0.3728888888888889
+      }
+    ],
+    "calibrated": [
+      {
+        "mean_predicted": 0.002117337614488565,
+        "observed_rate": 0.0027615833077631177
+      },
+      {
+        "mean_predicted": 0.008752412837049655,
+        "observed_rate": 0.00772626931567329
+      },
+      {
+        "mean_predicted": 0.011805921402128569,
+        "observed_rate": 0.012694300518134714
+      },
+      {
+        "mean_predicted": 0.015861521342298505,
+        "observed_rate": 0.02065848934796643
+      },
+      {
+        "mean_predicted": 0.024710834442407834,
+        "observed_rate": 0.026916058394160582
+      },
+      {
+        "mean_predicted": 0.04333233527703308,
+        "observed_rate": 0.03981179876945349
+      },
+      {
+        "mean_predicted": 0.07450002920953862,
+        "observed_rate": 0.06614987080103359
+      },
+      {
+        "mean_predicted": 0.1374267035121661,
+        "observed_rate": 0.13636363636363635
+      },
+      {
+        "mean_predicted": 0.3720617070661029,
+        "observed_rate": 0.38257575757575757
+      }
+    ]
+  },
+  "risk_bands": [
+    {
+      "band": "LOW",
+      "rows": 17997,
+      "share": 0.7998666666666666,
+      "defaults": 386,
+      "observed_rate": 0.021448019114296828,
+      "mean_predicted": 0.021695624223656743
+    },
+    {
+      "band": "MEDIUM",
+      "rows": 3520,
+      "share": 0.15644444444444444,
+      "defaults": 609,
+      "observed_rate": 0.17301136363636363,
+      "mean_predicted": 0.1734352955980273
+    },
+    {
+      "band": "HIGH",
+      "rows": 983,
+      "share": 0.04368888888888889,
+      "defaults": 509,
+      "observed_rate": 0.5178026449643948,
+      "mean_predicted": 0.5025146449846316
+    }
+  ],
+  "validation_reference": {
+    "raw": {
+      "pr_auc": 0.4120265031026799,
+      "roc_auc": 0.8694531924520579,
+      "brier": 0.04879249953832784,
+      "mean_predicted": 0.06732888466131426,
+      "observed_rate": 0.06684444444444444
+    },
+    "calibrated_out_of_fold": {
+      "pr_auc": 0.4005135039866795,
+      "roc_auc": 0.8673110829367702,
+      "brier": 0.04881316554348701,
+      "mean_predicted": 0.06682992820576736,
+      "observed_rate": 0.06684444444444444
+    },
+    "at_threshold": {
+      "threshold": 0.17,
+      "tp": 923,
+      "fp": 1910,
+      "fn": 581,
+      "tn": 19086,
+      "precision": 0.32580303565125307,
+      "recall": 0.6136968085106383,
+      "f1": 0.4256398432095919,
+      "flagged_rate": 0.1259111111111111,
+      "cost": 4815.0
+    }
+  },
+  "version_mismatches": {}
+}

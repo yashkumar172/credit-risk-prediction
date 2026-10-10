@@ -1,6 +1,6 @@
 # Credit Risk Prediction & Explainable Default Probability System
 
-> **Status: in development (Phase 10 — SHAP explanations complete).** Results,
+> **Status: in development (Phase 11 — final test evaluation complete).** Results,
 > figures and the full write-up are added as later phases are completed. See
 > [`SPEC.md`](SPEC.md) for the full specification and
 > [`DECISIONS.md`](DECISIONS.md) for the decisions made so far.
@@ -150,12 +150,13 @@ model. All statistics are learned inside the pipeline, from training data only.
 | Random Forest | None: native missing-value support keeps the informative missingness |
 | XGBoost | None: native missing-value handling |
 
-## Results so far
+## Results: model development
 
-All numbers come from `python -m src.train` and are saved in
+All numbers in this section come from `python -m src.train` and are saved in
 `reports/metrics/model_comparison.json`. Cross-validation is stratified 5-fold
-on the training split; "Val" is the validation split. The test set has not
-been used.
+on the training split; "Val" is the validation split. The test set was not
+used for any of these choices; its one-time results are in
+[Final test evaluation](#final-test-evaluation).
 
 **Model comparison** (untuned models; PR-AUC is the primary metric)
 
@@ -304,6 +305,74 @@ and the calibrator maps it to the 29.7% shown.
 Input values are shown after cleaning. For example, a past-due code of 98
 appears as "Unknown", which is what the model actually saw.
 
+## Final test evaluation
+
+The saved model was evaluated on the held-out **test split (22,500 rows,
+1,504 defaults) exactly once**, with `python -m src.evaluate --final`, after
+every modelling choice had been fixed. The command checks that the data file
+and the test split's row IDs match the ones recorded at training time. It
+refuses to run a second time unless `--force` is given, and no forced re-run
+has happened. Results are in `reports/metrics/test_metrics.json`.
+
+**Final test table** (Random Forest, tuned, isotonic calibration; 95%
+bootstrap confidence intervals from 1,000 resamples)
+
+| Metric | Deployed model (calibrated) | Raw Random Forest | Validation reference |
+|---|---|---|---|
+| **PR-AUC** (primary) | **0.392** [0.367, 0.418] | 0.411 [0.384, 0.440] | 0.401 (calibrated, out-of-fold) |
+| ROC-AUC | 0.869 [0.860, 0.879] | 0.870 [0.860, 0.880] | 0.869 (raw) |
+| Brier score | 0.0487 [0.0466, 0.0507] | 0.0485 [0.0465, 0.0506] | 0.0488 (calibrated, out-of-fold) |
+| Mean predicted PD | 6.64% | 6.70% | observed on test: 6.68% |
+
+**At the decision threshold 0.17** (calibrated PD; the threshold was chosen on
+validation with the illustrative costs 5 × missed default + 1 × false alarm):
+
+| Precision | Recall | F1 | Flagged | Expected cost |
+|---|---|---|---|---|
+| 0.334 | 0.621 | 0.434 | 12.4% | 4,713 |
+
+|  | Not flagged | Flagged for review |
+|---|---|---|
+| **No default** | 19,133 (TN) | 1,863 (FP) |
+| **Default** | 570 (FN) | 934 (TP) |
+
+On validation, the same threshold gave precision 0.326 and recall 0.614, so
+the operating point carried over to unseen data.
+
+![Confusion matrix](reports/figures/test_confusion_matrix.png)
+
+![ROC and precision-recall curves](reports/figures/test_roc_pr_curves.png)
+
+**Calibration.** Predicted PDs match observed default rates closely across
+the whole range, both raw and calibrated. Within each risk band the average
+PD matches the observed rate:
+
+| Risk band | Share of borrowers | Mean predicted PD | Observed default rate |
+|---|---|---|---|
+| Low (< 10%) | 80.0% | 2.2% | 2.1% |
+| Medium (10–30%) | 15.6% | 17.3% | 17.3% |
+| High (≥ 30%) | 4.4% | 50.3% | 51.8% |
+
+![Calibration curve](reports/figures/test_calibration_curve.png)
+
+**What the test results show**
+
+- **Performance held up.** The raw model's test PR-AUC (0.411) is almost
+  identical to its validation PR-AUC (0.412). Every point estimate lies
+  inside the test confidence intervals of the others, so there is no sign
+  of overfitting to the validation split.
+- **Isotonic calibration didn't help on test.** The raw forest was already
+  well calibrated: its Brier score (0.0485) is no worse than the calibrated
+  one (0.0487). The isotonic step function cost ranking detail: PR-AUC fell
+  from 0.411 to 0.392, as validation had predicted (0.412 → 0.401). The
+  method was chosen by a rule fixed before any results were seen. Changing
+  it now would be a decision informed by the test set, so the deployed model
+  keeps it. See `DECISIONS.md`, Phases 9 and 11.
+- **The intervals are wide.** PR-AUC spans about ±0.026, which is larger than
+  the differences between the candidate models in Phase 7. The choice of
+  Random Forest over XGBoost or Logistic Regression is a reasonable one, not
+  a proven one.
+
 ## Training
 
 ```powershell
@@ -318,7 +387,13 @@ saved final configuration on the training split and stops if the refit
 does not exactly reproduce the saved validation PR-AUC, or if the data, search
 or library versions have changed.
 
-The test split is never used by training.
+The test split is never used by training. It is used only by the one-time
+final evaluation:
+
+```powershell
+python -m src.evaluate --final          # ONE-TIME test evaluation (refuses to run again)
+python -m src.evaluate --final --force  # re-run only with a reason; record it in DECISIONS.md
+```
 
 ## Tests
 

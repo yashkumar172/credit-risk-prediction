@@ -25,6 +25,9 @@ TUNING_RESULTS_PATH = METRICS_DIR / "tuning_results.json"
 CALIBRATION_RESULTS_PATH = METRICS_DIR / "calibration_results.json"
 THRESHOLD_ANALYSIS_PATH = METRICS_DIR / "threshold_analysis.json"
 SHAP_GLOBAL_PATH = METRICS_DIR / "shap_global.json"
+TEST_CALIBRATION_FIGURE = FIGURES_DIR / "test_calibration_curve.png"
+TEST_ROC_PR_FIGURE = FIGURES_DIR / "test_roc_pr_curves.png"
+TEST_CONFUSION_FIGURE = FIGURES_DIR / "test_confusion_matrix.png"
 SHAP_BEESWARM_FIGURE = FIGURES_DIR / "shap_beeswarm.png"
 SHAP_BAR_FIGURE = FIGURES_DIR / "shap_mean_abs_bar.png"
 SHAP_LOCAL_EXAMPLE_FIGURE = FIGURES_DIR / "shap_local_example.png"
@@ -162,3 +165,10 @@ RISK_BAND_MEDIUM_UPPER = 0.30
 # Misclassification costs used to choose the decision threshold
 COST_FALSE_NEGATIVE = 5.0
 COST_FALSE_POSITIVE = 1.0
+
+# ---------------------------------------------------------------------------
+# Final test evaluation (SPEC §10.1, §11)
+# ---------------------------------------------------------------------------
+BOOTSTRAP_RESAMPLES = 1000
+CONFIDENCE_LEVEL = 0.95
+CALIBRATION_BINS = 10  # equal-count (quantile) bins for the reliability diagram

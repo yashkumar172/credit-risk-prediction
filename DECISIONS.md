@@ -523,3 +523,80 @@ in `reports/figures/eda_*.png`.
   were squashed into one commit, and the unreachable originals were pruned.
   The repository history therefore never contains the real row. Nothing had
   been pushed.
+
+## Phase 11 — Final test evaluation (2026-10-11)
+
+- **Implemented** `python -m src.evaluate --final` (`run_final_evaluation`
+  in `src/evaluate.py`). It loads the saved artifact and never fits
+  anything; it uses only the test split. Safeguards, all tested:
+  - It refuses to run if `test_metrics.json` exists, before even loading
+    the data. `--force` overrides this, and the output then records
+    `forced_rerun: true`.
+  - It refuses if the data file's SHA-256 differs from the one in the
+    model metadata, or if the test split's row-ID hash differs from
+    `split_summary.json`.
+  - It warns about library version differences against the metadata (none
+    were found).
+  - It writes the results file last, so an interrupted run leaves no
+    results and can be re-run without counting as a second evaluation.
+  - `_index_hash` in `data_loader.py` became the public `index_hash` for
+    this check.
+- **Confirmation before running.** Scoring the test set fixes the model, so
+  the open Phase 9 question (isotonic vs a log-odds sigmoid) was put to the
+  user first. **Decision: keep isotonic and run.** The test set was then
+  evaluated **once**. There has been no forced re-run.
+- **Metrics** (SPEC §10.1, §11): PR-AUC, ROC-AUC, Brier and mean PD for both
+  the deployed calibrated model and the raw forest. At the 0.17 threshold:
+  precision, recall, F1, the confusion matrix and the cost. Also 95%
+  percentile-bootstrap intervals (1,000 resamples, seed 42) for PR-AUC,
+  ROC-AUC and Brier. Raw and calibrated scores are evaluated on the same
+  resamples (paired); no resample was skipped. Also a reliability diagram
+  with 10 equal-count bins, and a risk-band table.
+- **Results:**
+
+  | | Calibrated (deployed) | Raw |
+  |---|---|---|
+  | PR-AUC | 0.3919 [0.3670, 0.4185] | 0.4107 [0.3844, 0.4398] |
+  | ROC-AUC | 0.8695 [0.8597, 0.8794] | 0.8701 [0.8603, 0.8798] |
+  | Brier | 0.04865 [0.04659, 0.05069] | 0.04850 [0.04649, 0.05057] |
+  | Mean PD (observed 0.0668) | 0.0664 | 0.0670 |
+
+  At 0.17: precision 0.334, recall 0.621, F1 0.434, 12.4% flagged,
+  TP 934 / FP 1,863 / FN 570 / TN 19,133, cost 4,713. On validation it was
+  precision 0.326 and recall 0.614.
+- **Interpretation:**
+  - Generalisation is good. The raw forest's test PR-AUC (0.411) matches
+    validation (0.412), and the operating point carried over.
+  - The Phase 9 caveat is confirmed. Isotonic calibration did not improve
+    Brier on test (0.04865 vs 0.04850 raw) and cost 0.019 PR-AUC through
+    tied PDs. The deployed model's headline PR-AUC is therefore 0.392 rather
+    than 0.411. This is reported as is. Switching calibration now would be
+    chosen with knowledge of the test results. **Lesson for future work:**
+    include "no calibration" (or a log-odds sigmoid) among the compared
+    options when the raw model is already well calibrated.
+  - The risk bands are well calibrated. Mean predicted vs observed:
+    Low 2.2% vs 2.1% (80% of borrowers), Medium 17.3% vs 17.3% (15.6%),
+    High 50.3% vs 51.8% (4.4%).
+  - The intervals are wide (PR-AUC ±0.026), wider than the Phase 7
+    differences between models.
+- **Figures:** `test_calibration_curve.png`, `test_roc_pr_curves.png` and
+  `test_confusion_matrix.png` (for the app, SPEC §14.3).
+- **PR-chart label (presentation fix).** On the PR chart, the "default rate
+  6.7%" label sat on the baseline and overlapped the end of the curve. The
+  code now labels the baseline in the legend ("No-skill baseline (default
+  rate …)"), and a regression test covers it. **User decision: fix the code
+  only.** Redrawing the committed PNG would need the test-set predictions,
+  which are not stored, so the test rows were not scored again. The existing
+  `test_roc_pr_curves.png` was produced before the fix and still shows the
+  overlap. Its numbers are correct. Any future `--final --force` run would
+  draw it with the fix. `test_metrics.json` and the three test figures are
+  unchanged (SHA-256 checked).
+- **Unchanged:** the model, metadata and all Phase 6–10 reports (SHA-256
+  checked before and after the run).
+- **Tests:** 14 new tests in `tests/test_final_evaluation.py`, on synthetic
+  data with temporary paths. They run the evaluation with the train and
+  validation splits made unusable. They also cover refusal on a second run,
+  the `--force` record, mismatched data or split, a missing artifact, the
+  CLI refusing before loading data, bootstrap reproducibility and coverage,
+  skipping of single-class resamples, the calibration table, the risk-band
+  table and the version check. 181 tests in total (182 after the PR-chart label fix).
