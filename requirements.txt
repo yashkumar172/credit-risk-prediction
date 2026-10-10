@@ -7,6 +7,7 @@ xgboost==3.4.1
 shap==0.52.0
 matplotlib==3.11.2
 streamlit==1.65.0
+altair==6.3.0
 joblib==1.6.0
 pytest==9.1.1
 ipykernel==7.4.0

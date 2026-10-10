@@ -132,6 +132,8 @@ def test_format_value(name, value, expected):
 def test_format_contribution_units():
     assert format_contribution(0.0412, PROBABILITY) == "+4.1 pp"
     assert format_contribution(-0.38, LOG_ODDS) == "-0.38 log-odds"
+    assert format_contribution(0.0003, PROBABILITY) == "+0.03 pp"  # small effects are not shown as "+0.0"
+    assert format_contribution(-0.0009, PROBABILITY) == "-0.09 pp"
 
 
 @pytest.mark.parametrize("pd_value, band", [

@@ -65,6 +65,13 @@ SHAP_NOTES = {
     LOG_ODDS: ("SHAP values explain the uncalibrated model's output in log-odds. The calibrator is applied "
                "afterwards, so the contributions do not add up exactly to the calibrated PD shown."),
 }
+# The same fact in one sentence, as SPEC §13.1 requires for the app
+SHAP_NOTES_ONE_SENTENCE = {
+    PROBABILITY: ("Contributions are SHAP values of the uncalibrated model's probability, in percentage points, "
+                  "so they do not add up exactly to the calibrated PD shown."),
+    LOG_ODDS: ("Contributions are SHAP values of the uncalibrated model's output, in log-odds, "
+               "so they do not add up exactly to the calibrated PD shown."),
+}
 
 
 # --- unwrapping and the explainer ---------------------------------------------------------
@@ -169,7 +176,10 @@ def format_value(name: str, value) -> str:
 
 
 def format_contribution(contribution: float, units: str) -> str:
-    return f"{100 * contribution:+.1f} pp" if units == PROBABILITY else f"{contribution:+.2f} log-odds"
+    if units == PROBABILITY:
+        points = 100 * contribution
+        return f"{points:+.1f} pp" if abs(points) >= 0.1 else f"{points:+.2f} pp"  # no misleading "+0.0"
+    return f"{contribution:+.2f} log-odds"
 
 
 def risk_band(pd_value: float) -> str:

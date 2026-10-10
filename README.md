@@ -1,6 +1,6 @@
 # Credit Risk Prediction & Explainable Default Probability System
 
-> **Status: in development (Phase 11 — final test evaluation complete).** Results,
+> **Status: in development (Phase 12 — Streamlit application complete).** Results,
 > figures and the full write-up are added as later phases are completed. See
 > [`SPEC.md`](SPEC.md) for the full specification and
 > [`DECISIONS.md`](DECISIONS.md) for the decisions made so far.
@@ -372,6 +372,51 @@ PD matches the observed rate:
   the differences between the candidate models in Phase 7. The choice of
   Random Forest over XGBoost or Logistic Regression is a reasonable one, not
   a proven one.
+
+## Application
+
+```powershell
+streamlit run app.py
+```
+
+The app opens at `http://localhost:8501`. It **only loads** the saved model
+(`models/`) and reports (`reports/`). It never trains a model, never reads the
+raw dataset and never touches the test set. Tests check this by making any
+attempt to load the dataset fail.
+
+| Page | Contents |
+|---|---|
+| **Home** | What the model predicts, the target definition, headline test results, key limitations |
+| **Prediction** | A form with the 10 raw features → calibrated PD, risk band, review flag, and the local SHAP explanation |
+| **Model performance** | Final test metrics with confidence intervals; ROC/PR curves, confusion matrix, calibration and threshold plots; the model comparison |
+| **Explainability** | Global SHAP plots and feature ranking, with the note on what SHAP explains |
+| **About and limitations** | Dataset limitations and responsible-use notes (bias, age, proxies, dataset shift, error costs, human oversight) |
+
+**Prediction page:**
+
+- The form is built from the feature list in `model_metadata.json`, in the
+  same order. The input rules live in
+  [`src/predict.py`](src/predict.py).
+- **Hard limits:** no negative values, and age must be 18–110. Past-due
+  counts are capped at 89, because 96 and 98 are dataset codes, not counts.
+- **Unknown values:** income and dependents each have an **Unknown**
+  checkbox, which sends a missing value. When income is unknown, the debt
+  ratio field is disabled, because the model ignores it in that case.
+- **Warnings:** the app warns when an input lies outside the training data's
+  1st–99th percentile range ("the prediction may be less reliable"). It also
+  notes inputs the model treats as unknown: an income of 0, or a
+  utilization above 10.
+- **Output:** the calibrated PD, the risk band, and whether the borrower is
+  flagged for manual review (PD ≥ 0.17). Below that, the top 3 factors
+  raising and lowering risk, and a chart of the 10 largest SHAP
+  contributions. A one-sentence note explains that the contributions are for
+  the uncalibrated model and do not add up exactly to the PD shown.
+- A result is shown only for the inputs it was computed from. If any input
+  changes, the app asks for a new prediction.
+- **Version check:** the app shows a warning if the installed library
+  versions differ from those recorded in the metadata.
+
+Screenshots will be added with the final documentation (Phase 14).
 
 ## Training
 

@@ -600,3 +600,87 @@ in `reports/figures/eda_*.png`.
   CLI refusing before loading data, bootstrap reproducibility and coverage,
   skipping of single-class resamples, the calibration table, the risk-band
   table and the version check. 181 tests in total (182 after the PR-chart label fix).
+
+## Phase 12 — Streamlit application (2026-10-11)
+
+- **Structure** (SPEC §14.6). `app.py` is the entry point (`streamlit run
+  app.py`). It uses `st.navigation` with top navigation and five pages in
+  `app_pages/`: Home, Prediction, Model performance, Explainability, About
+  and limitations. Pages are plain scripts. `app_support.py` holds the
+  cached loaders: `st.cache_resource` for the model and explainer, loaded
+  once, and `st.cache_data` for the report JSONs. `app_pages/` was used
+  instead of the legacy `pages/` folder, following Streamlit's current
+  multipage guidance.
+- **`src/predict.py`** (SPEC §15.1) holds all prediction logic and does not
+  import Streamlit. It covers loading the artifact and metadata (with the
+  version check, reusing `version_mismatches` from Phase 11), input
+  validation, range warnings, and the PD, band, flag and SHAP explanation.
+  The app pages only display results.
+- **The app is read-only.** It loads `models/` and `reports/` only. Tests run
+  every page with `load_raw_data` replaced by a function that fails, so any
+  attempt to read the dataset would break them.
+- **Inputs** (SPEC §14.2). The form is built from
+  `metadata["raw_input_features"]`, in order. `INPUT_SPECS` holds labels,
+  defaults, steps, help text and limits, and a test keeps it in sync with
+  the raw feature list. Choices:
+  - **Hard limits:** no negatives, and age 18–110, as specified.
+    Additionally, the past-due counts are capped at 89, because the
+    training rule turns values of 90 and above (codes 96/98) into
+    "unknown". Letting users type 96 would silently mean "unknown".
+  - **Unknown values:** income and dependents have "Unknown" checkboxes,
+    which send NaN. When income is unknown, the debt-ratio field is
+    disabled and labelled as unused. This closes the Phase 4 note (rule 4
+    makes the model ignore the debt ratio when income is missing).
+  - **Warnings:** a warning appears when an input lies outside the training
+    1st–99th percentile range (from the metadata). For inputs the cleaning
+    step turns into unknowns (income 0, utilization above 10), the app
+    shows an explanatory note instead of a range warning. A test checks
+    that these notes agree with `CleaningTransformer`.
+  - **Defaults** describe an invented, typical borrower, not a dataset row.
+  - **Layout:** the first half of the inputs is in the left column and the
+    second half on the right, so the reading order (and the order seen in
+    tests) equals the metadata order, as SPEC §19.5 requires.
+- **No form.** Plain widgets and a "Predict risk" button were used instead
+  of `st.form`, because the debt-ratio field must react immediately when
+  income is marked unknown, and widgets inside a form only update on
+  submit. A prediction takes about 0.1 s, so the extra reruns cost nothing.
+  The result is stored together with the inputs it was computed from, and
+  it is hidden as soon as any input changes. A stale PD is never shown next
+  to new inputs.
+- **Output.** Three metrics: PD, risk band, and review flag. The decision
+  threshold and the illustrative cost assumption are stated beneath them.
+  Below that, the top 3 factors increasing and reducing risk, and an
+  Altair bar chart of the 10 largest contributions. The SPEC §13.1 note
+  appears as one sentence (`SHAP_NOTES_ONE_SENTENCE`; the existing
+  two-sentence note in `shap_global.json` is unchanged). A caption shows
+  that the average uncalibrated PD plus the contributions equals the
+  uncalibrated PD, which the calibrator maps to the PD shown.
+- **Small contributions** now display with two decimals below 0.1 pp (for
+  example "+0.03 pp") instead of a misleading "+0.0 pp". All values in the
+  committed reports are ≥ 0.6 pp, so their text is unchanged.
+- **Performance page:** final test metrics with CIs (raw and calibrated),
+  the figures in tabs (ROC/PR, confusion matrix, calibration with the
+  risk-band table, threshold analysis), and the model comparison table.
+  **Explainability page:** the global SHAP figures, the units note and the
+  feature ranking. **About page:** the SPEC §14.5 dataset limitations and
+  the §21 responsible-ML points, including the role of age (rank 5 of 13 by
+  mean |SHAP|) and the flag-for-review framing.
+- **Styling:** native Streamlit elements and Material icons only, with no
+  custom CSS and no theme file. The chart colours reuse the report palette.
+- **`altair==6.3.0` pinned**, because the app imports it directly. It was
+  already installed with Streamlit.
+- **Tests:**
+  - `tests/test_predict.py` (22 tests): the input specs, validation,
+    warnings, agreement with the cleaning step, the predictor on a
+    synthetic artifact (including NaN inputs, the threshold flag, version
+    mismatch and a missing artifact), and one real-artifact test, skipped
+    when the artifact is absent.
+  - `tests/test_app.py` (17 tests, `AppTest`, headless): every page renders
+    without reports. The SPEC §19.5 schema test checks the input fields
+    against the metadata, exactly and in order. Also hard limits, the
+    end-to-end prediction (§19.6 through the UI), hiding stale results,
+    unknown income, the missing-artifact message, and the real metadata
+    and reports (skipped when absent).
+  - A shared fixture, `tests/fixtures/make_synthetic_artifact.py`.
+- **Not done in this phase:** screenshots for the README. They need the app
+  running in a browser and belong with the final documentation (Phase 14).
