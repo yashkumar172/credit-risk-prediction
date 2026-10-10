@@ -1,6 +1,6 @@
 # Credit Risk Prediction & Explainable Default Probability System
 
-> **Status: in development (Phase 9 — calibration, decision threshold and model artifact complete).** Results,
+> **Status: in development (Phase 10 — SHAP explanations complete).** Results,
 > figures and the full write-up are added as later phases are completed. See
 > [`SPEC.md`](SPEC.md) for the full specification and
 > [`DECISIONS.md`](DECISIONS.md) for the decisions made so far.
@@ -235,12 +235,82 @@ the 10 raw input columns and returns a calibrated PD.
 hyperparameters, risk bands, training-data percentiles, data hash and library
 versions.
 
+## Explainability (SHAP)
+
+[`src/explain.py`](src/explain.py) takes the Random Forest back out of the
+calibrated artifact and explains it with `shap.TreeExplainer`.
+
+> **What the numbers mean.** SHAP explains the **uncalibrated** Random
+> Forest. A Random Forest predicts a probability, not log-odds, so each
+> contribution is in **percentage points of the uncalibrated PD**, and the
+> contributions add up exactly to that PD. The calibrator is applied
+> afterwards. It is monotonic, so it keeps the ranking and direction of each
+> effect, but the contributions do not add up exactly to the calibrated PD
+> that is displayed. (XGBoost or Logistic Regression would be explained in
+> log-odds; the code supports both.)
+
+**Global explanation.** SHAP values were computed for a stratified sample of
+**2,000 validation rows** (seed 42, 134 defaults, 6.7%). The test set is not
+used. Results are in `reports/metrics/shap_global.json`, including a hash of
+the sampled row IDs.
+
+![SHAP summary](reports/figures/shap_beeswarm.png)
+
+![Mean absolute SHAP](reports/figures/shap_mean_abs_bar.png)
+
+| Rank | Feature | Mean \|SHAP\| (pp) | Higher value → |
+|---|---|---|---|
+| 1 | Revolving credit utilization | 2.79 | higher risk |
+| 2 | Total past-due count | 2.67 | higher risk |
+| 3 | Times 90+ days late | 1.70 | higher risk |
+| 4 | Times 60–89 days late | 0.91 | higher risk |
+| 5 | Age | 0.79 | lower risk |
+
+Direction is the sign of the rank correlation between a feature's value and
+its SHAP value in the sample. Past-due history and utilization dominate, as
+the EDA suggested. Income-related features rank near the bottom.
+
+**Local explanation.** For a single prediction, `explain_row` returns the
+calibrated PD, the risk band, and every feature's input value and SHAP
+contribution. `format_local_explanation` lists the top 3 factors that
+increase risk and the top 3 that reduce it. The text is built only from SHAP
+values and input values.
+
+The example below is for an **invented borrower**, not a row from the
+dataset, so no real Kaggle records are published. Its inputs are
+`SHAP_EXAMPLE_BORROWER` in `src/config.py`: utilization 1.05, age 52, twice
+30–59 days late, never 60+ days late, debt ratio 0.35, income 5,200, 8 open
+lines, 1 real-estate loan, 1 dependent.
+
+```text
+Probability of Default: 29.7%   (Risk band: MEDIUM)
+
+Factors increasing risk:
+- Total past-due count: 2              (+10.9 pp)
+- Revolving credit utilization: 1.05   (+10.8 pp)
+- Utilization over credit limit: Yes   (+7.6 pp)
+
+Factors reducing risk:
+- Times 90+ days late: 0     (-2.3 pp)
+- Times 60-89 days late: 0   (-1.3 pp)
+- Debt ratio: 0.35           (-0.8 pp)
+```
+
+Its uncalibrated PD is 34.4%. The SHAP contributions add up to that value,
+and the calibrator maps it to the 29.7% shown.
+
+![Local SHAP example](reports/figures/shap_local_example.png)
+
+Input values are shown after cleaning. For example, a past-due code of 98
+appears as "Unknown", which is what the model actually saw.
+
 ## Training
 
 ```powershell
-python -m src.train                 # compare, select, tune, calibrate, save (about 5 min when the cached search is reused)
+python -m src.train                 # compare, select, tune, calibrate, save, global SHAP (about 9 min when the cached search is reused)
 python -m src.train --retune        # also re-run the hyperparameter search (about 30 min on a 6-core laptop)
-python -m src.train --from-phase 9  # only calibration, threshold and saving, reusing the saved Phase 6-8 results (about 20 s)
+python -m src.train --from-phase 9  # only calibration, threshold, saving and global SHAP, reusing the saved Phase 6-8 results (about 4.5 min)
+python -m src.explain               # only global SHAP for the saved model; no training (about 4 min)
 ```
 
 `--from-phase 9` leaves the Phase 6–8 reports unchanged. It refits the

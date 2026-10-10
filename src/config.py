@@ -24,6 +24,10 @@ MODEL_COMPARISON_PATH = METRICS_DIR / "model_comparison.json"
 TUNING_RESULTS_PATH = METRICS_DIR / "tuning_results.json"
 CALIBRATION_RESULTS_PATH = METRICS_DIR / "calibration_results.json"
 THRESHOLD_ANALYSIS_PATH = METRICS_DIR / "threshold_analysis.json"
+SHAP_GLOBAL_PATH = METRICS_DIR / "shap_global.json"
+SHAP_BEESWARM_FIGURE = FIGURES_DIR / "shap_beeswarm.png"
+SHAP_BAR_FIGURE = FIGURES_DIR / "shap_mean_abs_bar.png"
+SHAP_LOCAL_EXAMPLE_FIGURE = FIGURES_DIR / "shap_local_example.png"
 
 # ---------------------------------------------------------------------------
 # Dataset schema (verified against cs-training.csv in Phase 2)
@@ -73,6 +77,23 @@ UTILIZATION_LIMIT = 1.0
 ENGINEERED_FEATURES = ["total_past_due", "income_per_dependent", "utilization_over_limit"]
 MODEL_FEATURES = [*RAW_FEATURES, *ENGINEERED_FEATURES]
 
+# Human-readable labels for explanations and the app (SPEC §13.3)
+FEATURE_LABELS = {
+    "RevolvingUtilizationOfUnsecuredLines": "Revolving credit utilization",
+    "age": "Age",
+    "NumberOfTime30-59DaysPastDueNotWorse": "Times 30-59 days late",
+    "DebtRatio": "Debt ratio",
+    "MonthlyIncome": "Monthly income",
+    "NumberOfOpenCreditLinesAndLoans": "Open credit lines and loans",
+    "NumberOfTimes90DaysLate": "Times 90+ days late",
+    "NumberRealEstateLoansOrLines": "Real-estate loans or lines",
+    "NumberOfTime60-89DaysPastDueNotWorse": "Times 60-89 days late",
+    "NumberOfDependents": "Number of dependents",
+    "total_past_due": "Total past-due count",
+    "income_per_dependent": "Income per household member",
+    "utilization_over_limit": "Utilization over credit limit",
+}
+
 # ---------------------------------------------------------------------------
 # Model-specific preprocessing (SPEC §8)
 # ---------------------------------------------------------------------------
@@ -101,6 +122,27 @@ WINSOR_UPPER_QUANTILE = 0.99
 # Reproducibility
 # ---------------------------------------------------------------------------
 RANDOM_STATE = 42
+
+# ---------------------------------------------------------------------------
+# Explainability (SPEC §13)
+# ---------------------------------------------------------------------------
+SHAP_SAMPLE_SIZE = 2000  # stratified validation rows for global SHAP (SPEC §13.2)
+SHAP_TOP_N = 3           # factors listed in each direction for a local explanation
+
+# Invented borrower for the committed local-explanation example (README, reports).
+# Not a dataset row: no real Kaggle rows are committed (SPEC §19.1).
+SHAP_EXAMPLE_BORROWER = {
+    "RevolvingUtilizationOfUnsecuredLines": 1.05,
+    "age": 52,
+    "NumberOfTime30-59DaysPastDueNotWorse": 2,
+    "DebtRatio": 0.35,
+    "MonthlyIncome": 5200,
+    "NumberOfOpenCreditLinesAndLoans": 8,
+    "NumberOfTimes90DaysLate": 0,
+    "NumberRealEstateLoansOrLines": 1,
+    "NumberOfTime60-89DaysPastDueNotWorse": 0,
+    "NumberOfDependents": 1,
+}
 
 # ---------------------------------------------------------------------------
 # Data splits (SPEC §5.1): stratified 70 / 15 / 15

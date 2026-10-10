@@ -14,6 +14,8 @@ Stages implemented so far:
               ``--from-phase 9`` runs only this stage: the saved Phase 6-8 results
               are reused (and left unchanged), and the final configuration is
               refitted on train and checked against its saved validation PR-AUC.
+    Phase 10 - Global SHAP explanation (SPEC §13.2) on a stratified validation sample,
+              via ``src.explain`` (also runnable alone: ``python -m src.explain``).
 
 Every candidate is evaluated with stratified 5-fold CV on the training split,
 then fitted on the full training split and scored on the validation split.
@@ -61,6 +63,7 @@ from src.evaluate import (
     plot_threshold_analysis,
     probability_metrics,
 )
+from src.explain import run_global_explanation
 from src.feature_engineering import CleaningTransformer
 from src.preprocessing import make_model_pipeline
 from src.tune import N_ITER, search_signature, tune_model
@@ -442,13 +445,15 @@ def save_artifact(calibrated, metadata: dict) -> None:
                 config.PIPELINE_PATH.stat().st_size / 1e6)
 
 
-def run_phase_9(final_pipeline: Pipeline, selection: dict, tuning: dict, split: DataSplit, data_sha256: str) -> None:
-    """Calibrate, choose the threshold, and write the Phase 9 reports, artifact and metadata."""
+def run_phase_9(final_pipeline: Pipeline, selection: dict, tuning: dict, split: DataSplit, data_sha256: str):
+    """Calibrate, choose the threshold, and write the Phase 9 reports, artifact and metadata.
+    Returns the calibrated artifact."""
     calibrated, calibration_report, threshold_report = run_calibration_and_threshold(final_pipeline, split)
     write_json(config.CALIBRATION_RESULTS_PATH, calibration_report)
     write_json(config.THRESHOLD_ANALYSIS_PATH, threshold_report)
     save_artifact(calibrated, build_metadata(final_pipeline, selection, tuning, calibration_report,
                                              threshold_report, split, data_sha256))
+    return calibrated
 
 
 def write_json(path, data: dict) -> None:
@@ -477,7 +482,8 @@ def main(argv: list[str] | None = None) -> None:
 
     if args.from_phase == 9:
         selection, tuning, final_pipeline = load_phase_8_results(split, data_sha256)
-        run_phase_9(final_pipeline, selection, tuning, split, data_sha256)
+        calibrated = run_phase_9(final_pipeline, selection, tuning, split, data_sha256)
+        run_global_explanation(calibrated, split)
         logger.info("Total time %.1fs", time.perf_counter() - start)
         return
 
@@ -491,7 +497,8 @@ def main(argv: list[str] | None = None) -> None:
     selection["final_configuration"] = tuning["final_configuration"]
     write_json(config.TUNING_RESULTS_PATH, tuning)
 
-    run_phase_9(final_pipeline, selection, tuning, split, data_sha256)
+    calibrated = run_phase_9(final_pipeline, selection, tuning, split, data_sha256)
+    run_global_explanation(calibrated, split)
 
     report = {
         "data_sha256": data_sha256,

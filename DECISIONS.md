@@ -422,3 +422,104 @@ in `reports/figures/eda_*.png`.
   not used; it was only created by the deterministic split, never read.
 - **Runtime:** `--from-phase 9` takes 18 s, including the refit on the
   training split.
+
+## Phase 10 — SHAP explanations (2026-10-11)
+
+- **Implemented** `src/explain.py`. `unwrap_artifact` takes the frozen,
+  train-fitted pipeline out of the calibrated wrapper. `make_explainer` uses
+  `TreeExplainer` for Random Forest and XGBoost and `LinearExplainer` for
+  Logistic Regression, on the output of the preprocessing steps. The
+  module also provides the global report and figures, `explain_row` and
+  `format_local_explanation` for local explanations, and `FEATURE_LABELS`
+  in `config.py`. Run it with `python -m src.explain` (loads the saved
+  artifact, no training). `python -m src.train`, including
+  `--from-phase 9`, now ends with the same step (SPEC §15.2).
+- **Units deviate from SPEC §13.1 for the Random Forest.** A scikit-learn
+  forest outputs an averaged probability, so `TreeExplainer` explains a
+  probability, not log-odds. SHAP values are therefore reported in
+  percentage points of the uncalibrated PD. On the real artifact they add
+  up exactly to that PD (max error 1e-14), including rows with missing
+  values (the forest's native NaN routing is handled correctly). Converting
+  to log-odds afterwards would break additivity, so it was not done. XGBoost
+  and LR keep log-odds, and tests check additivity for all three models.
+  SPEC §13.1 now carries an amendment, and the explanation note is worded
+  per unit.
+- **Calibration and SHAP.** The isotonic calibrator is monotonic
+  (non-decreasing), so the ranking and direction of effects carry over. It
+  is also a step function: two borrowers with different SHAP profiles can
+  get the same displayed PD. The local explanation shows the calibrated PD
+  for the decision and the contributions for the uncalibrated output. The
+  example borrower has an uncalibrated PD of 34.4% and a calibrated PD of
+  29.7%.
+- **Global sample** (SPEC §13.2): 2,000 validation rows, stratified by the
+  target with `train_test_split(random_state=42)`. That gives 134 defaults
+  (6.7%). The SHA-256 of the sorted row IDs is recorded in `shap_global.json`.
+  The test split is never read; tests run the stage with an unusable test
+  split.
+- **Results:** utilization (2.79 pp mean |SHAP|), total past-due count
+  (2.67), 90+ days late (1.70), 60–89 days late (0.91) and age (0.79) lead.
+  Income-related features are near the bottom (0.26–0.32). Directions (rank
+  correlation of value vs SHAP) agree with the EDA: utilization and past-due
+  counts increase risk, and age decreases it (ρ = −0.89). Age is the
+  protected attribute flagged in Phase 3 and ranks 5th; noted for §21.
+- **Display choices:**
+  - Input values are shown after cleaning, i.e. what the model actually saw:
+    a past-due code of 98 or zero income appears as "Unknown". Engineered
+    features appear with their computed values.
+  - For LR, values are shown before scaling, and missing-indicator columns
+    appear as "<feature> unknown: Yes/No".
+  - The text contains only labels, input values and signed contributions,
+    with no qualitative wording. A test checks this.
+- **Local example** for the README and reports: an invented borrower
+  (`SHAP_EXAMPLE_BORROWER` in `config.py`), not a dataset row. See the
+  correction below.
+- **`risk_band` lives in `src/explain.py`** because the local explanation
+  needs it. Phase 12's `predict.py` should import it rather than duplicate
+  it.
+- **Runtime:** 236 s for the 2,000 rows (about 118 ms per row, single
+  process). Local explanations take about 0.1 s per row, which is fine for
+  the app. Global SHAP adds about 4 minutes to `python -m src.train`. A
+  from-scratch `--retune` run therefore takes about 34 minutes instead of 30,
+  on top of the overrun already accepted in Phase 8.
+- **`scipy` pinned** in `requirements.txt` (1.18.1, already installed as a
+  scikit-learn dependency), because `src/explain.py` imports it directly.
+- **Tests:** 28 new tests in `tests/test_explain.py`. They cover
+  unwrapping, additivity for RF, XGBoost and LR, labels and value
+  formatting, risk-band boundaries, and the SPEC §19.6 end-to-end path from
+  synthetic raw input to the SHAP explanation. They also cover the
+  qualitative-wording check, the fixed stratified sample, the global report
+  and files, and one test on the real artifact that is skipped when it is
+  absent. The Phase 9 end-to-end test now redirects the SHAP output paths,
+  so it never writes to `reports/`.
+- **Not changed:** the model, metadata and all Phase 6–9 reports (SHA-256
+  checked before and after).
+
+### Phase 10 correction — synthetic local example (2026-10-11)
+
+- **Problem.** The first Phase 10 commit (never pushed) used a real
+  validation row as the local example. Its input values appeared in the README, in `shap_global.json`
+  and in `shap_local_example.png`. That publishes a Kaggle record, against
+  the competition's data rules and the SPEC's "no real Kaggle rows
+  committed" rule (§19.1).
+- **Fix.** The example is now an invented borrower,
+  `SHAP_EXAMPLE_BORROWER` in `config.py`: a higher-risk profile with
+  utilization just over the limit and two 30–59-day delays. It was built by
+  hand with round values. A one-off check confirmed that no row of
+  `cs-training.csv` matches it on all 10 features; the closest row shares 7,
+  mostly zero counts. `example_row` (which picked a real row) was removed,
+  and the report entry now records `"source": "synthetic borrower"` and the
+  inputs instead of a row ID.
+- **Global results unchanged.** Only the `local_example` block of
+  `shap_global.json` and `shap_local_example.png` were regenerated, from
+  the saved model and without loading the dataset. A script checked that
+  every other byte of `shap_global.json` was identical before writing it.
+  The beeswarm, the bar chart, the model and the metadata have the same
+  SHA-256 as before. No retraining was done.
+- **Tests.** Three new tests: the example is a valid raw input, it is not
+  present in the synthetic data, and the report entry matches
+  `explain_row`. The report test now checks that no row ID is written. 167
+  tests in total.
+- **Git history.** At the user's request, the Phase 10 commit and this fix
+  were squashed into one commit, and the unreachable originals were pruned.
+  The repository history therefore never contains the real row. Nothing had
+  been pushed.

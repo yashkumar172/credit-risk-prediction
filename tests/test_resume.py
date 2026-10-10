@@ -87,6 +87,10 @@ def test_from_phase_9_end_to_end(monkeypatch, tmp_path, phase_8):
                        ("CALIBRATION_RESULTS_PATH", tmp_path / "calibration_results.json"),
                        ("THRESHOLD_ANALYSIS_PATH", tmp_path / "threshold_analysis.json"),
                        ("FIGURES_DIR", tmp_path / "figures"),
+                       ("SHAP_GLOBAL_PATH", tmp_path / "shap_global.json"),
+                       ("SHAP_BEESWARM_FIGURE", tmp_path / "figures" / "shap_beeswarm.png"),
+                       ("SHAP_BAR_FIGURE", tmp_path / "figures" / "shap_bar.png"),
+                       ("SHAP_LOCAL_EXAMPLE_FIGURE", tmp_path / "figures" / "shap_local.png"),
                        ("MODELS_DIR", tmp_path / "models"),
                        ("PIPELINE_PATH", tmp_path / "models" / "pipeline.joblib"),
                        ("METADATA_PATH", tmp_path / "models" / "metadata.json")):
@@ -110,6 +114,7 @@ def test_from_phase_9_end_to_end(monkeypatch, tmp_path, phase_8):
     assert metadata["model"]["configuration"] == "tuned"
     assert metadata["model"]["hyperparameters"]["max_depth"] == 5
     assert (config.FIGURES_DIR / "threshold_analysis_validation.png").exists()
+    assert json.loads(config.SHAP_GLOBAL_PATH.read_text())["sample"]["source"] == "validation split"
 
     loaded = joblib.load(config.PIPELINE_PATH)
     pd_val = loaded.predict_proba(split_xy(split.validation)[0])[:, 1]

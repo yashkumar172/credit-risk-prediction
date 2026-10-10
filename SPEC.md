@@ -546,6 +546,13 @@ it does not change the ranking or direction of feature effects. The
 SHAP contributions will not add up exactly to the displayed calibrated
 PD, and the UI must say this in one sentence.
 
+*Amendment (Phase 10, see `DECISIONS.md`):* log-odds applies to XGBoost
+and Logistic Regression. A scikit-learn Random Forest outputs an
+averaged probability, not log-odds, so its SHAP values are in
+**probability units** (shown as percentage points of the uncalibrated
+PD). They add up exactly to that uncalibrated PD. The rest of this
+section applies unchanged.
+
 -   XGBoost / Random Forest: `shap.TreeExplainer` on the fitted model,
     using the output of the pipeline's preprocessing steps as input.
 -   Logistic Regression, if selected: `shap.LinearExplainer`.

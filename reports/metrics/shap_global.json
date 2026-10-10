@@ -1,0 +1,149 @@
+{
+  "explains": "the uncalibrated model inside the calibrated artifact",
+  "explainer": "TreeExplainer",
+  "model": "RandomForestClassifier",
+  "units": "probability",
+  "note": "SHAP values explain the uncalibrated model's predicted probability, in percentage points. The calibrator is applied afterwards, so the contributions do not add up exactly to the calibrated PD shown.",
+  "sample": {
+    "source": "validation split",
+    "rows": 2000,
+    "defaults": 134,
+    "default_rate": 0.067,
+    "method": "stratified by target (train_test_split)",
+    "random_state": 42,
+    "row_ids_sha256": "0ad8cae1194066ad25176482e5a6c34b2faa002dc9278d2f77b18ada7628d0bd"
+  },
+  "base_value": 0.06684523809523811,
+  "mean_raw_output": 0.06678130799774934,
+  "max_additivity_error": 9.603429163007604e-15,
+  "shap_seconds": 235.7,
+  "top_features": [
+    "Revolving credit utilization",
+    "Total past-due count",
+    "Times 90+ days late",
+    "Times 60-89 days late",
+    "Age"
+  ],
+  "features": [
+    {
+      "feature": "RevolvingUtilizationOfUnsecuredLines",
+      "label": "Revolving credit utilization",
+      "mean_abs_shap": 0.027884658100403,
+      "mean_shap": 7.567933347844891e-05,
+      "value_shap_spearman": 0.8056434866435469,
+      "rank": 1
+    },
+    {
+      "feature": "total_past_due",
+      "label": "Total past-due count",
+      "mean_abs_shap": 0.026662750307408778,
+      "mean_shap": 0.0023231440626192575,
+      "value_shap_spearman": 0.7044209069132404,
+      "rank": 2
+    },
+    {
+      "feature": "NumberOfTimes90DaysLate",
+      "label": "Times 90+ days late",
+      "mean_abs_shap": 0.01700019571316516,
+      "mean_shap": -0.0012376983076667135,
+      "value_shap_spearman": 0.38178841074667574,
+      "rank": 3
+    },
+    {
+      "feature": "NumberOfTime60-89DaysPastDueNotWorse",
+      "label": "Times 60-89 days late",
+      "mean_abs_shap": 0.009076063923204583,
+      "mean_shap": -0.000356986161909132,
+      "value_shap_spearman": 0.3763605258161198,
+      "rank": 4
+    },
+    {
+      "feature": "age",
+      "label": "Age",
+      "mean_abs_shap": 0.007852523313782608,
+      "mean_shap": -0.00022371535252219582,
+      "value_shap_spearman": -0.8889858331835298,
+      "rank": 5
+    },
+    {
+      "feature": "NumberOfTime30-59DaysPastDueNotWorse",
+      "label": "Times 30-59 days late",
+      "mean_abs_shap": 0.0067966487069024755,
+      "mean_shap": -0.000169426247248687,
+      "value_shap_spearman": 0.6473559134902327,
+      "rank": 6
+    },
+    {
+      "feature": "DebtRatio",
+      "label": "Debt ratio",
+      "mean_abs_shap": 0.005853344600684282,
+      "mean_shap": 0.00015257988577818064,
+      "value_shap_spearman": 0.5006781474252073,
+      "rank": 7
+    },
+    {
+      "feature": "NumberOfOpenCreditLinesAndLoans",
+      "label": "Open credit lines and loans",
+      "mean_abs_shap": 0.004327145501991694,
+      "mean_shap": -0.000207476530840547,
+      "value_shap_spearman": 0.4840041336830972,
+      "rank": 8
+    },
+    {
+      "feature": "income_per_dependent",
+      "label": "Income per household member",
+      "mean_abs_shap": 0.0031839572454443123,
+      "mean_shap": 0.00013277582357583,
+      "value_shap_spearman": -0.5510958509007367,
+      "rank": 9
+    },
+    {
+      "feature": "utilization_over_limit",
+      "label": "Utilization over credit limit",
+      "mean_abs_shap": 0.002917255993496652,
+      "mean_shap": -0.0005406537735689545,
+      "value_shap_spearman": 0.2396741878146848,
+      "rank": 10
+    },
+    {
+      "feature": "NumberRealEstateLoansOrLines",
+      "label": "Real-estate loans or lines",
+      "mean_abs_shap": 0.0028765901090372042,
+      "mean_shap": -7.087939566608617e-05,
+      "value_shap_spearman": -0.3251949376765987,
+      "rank": 11
+    },
+    {
+      "feature": "MonthlyIncome",
+      "label": "Monthly income",
+      "mean_abs_shap": 0.002615357185448727,
+      "mean_shap": 0.0001410419585426001,
+      "value_shap_spearman": -0.5417016370845087,
+      "rank": 12
+    },
+    {
+      "feature": "NumberOfDependents",
+      "label": "Number of dependents",
+      "mean_abs_shap": 0.0012355907350512845,
+      "mean_shap": -8.231539206073373e-05,
+      "value_shap_spearman": 0.6583331175136016,
+      "rank": 13
+    }
+  ],
+  "local_example": {
+    "source": "synthetic borrower (config.SHAP_EXAMPLE_BORROWER), not a dataset row",
+    "inputs": {
+      "RevolvingUtilizationOfUnsecuredLines": 1.05,
+      "age": 52,
+      "NumberOfTime30-59DaysPastDueNotWorse": 2,
+      "DebtRatio": 0.35,
+      "MonthlyIncome": 5200,
+      "NumberOfOpenCreditLinesAndLoans": 8,
+      "NumberOfTimes90DaysLate": 0,
+      "NumberRealEstateLoansOrLines": 1,
+      "NumberOfTime60-89DaysPastDueNotWorse": 0,
+      "NumberOfDependents": 1
+    },
+    "text": "Probability of Default: 29.7%   (Risk band: MEDIUM)\n\nFactors increasing risk:\n- Total past-due count: 2              (+10.9 pp)\n- Revolving credit utilization: 1.05   (+10.8 pp)\n- Utilization over credit limit: Yes   (+7.6 pp)\n\nFactors reducing risk:\n- Times 90+ days late: 0     (-2.3 pp)\n- Times 60-89 days late: 0   (-1.3 pp)\n- Debt ratio: 0.35           (-0.8 pp)\n\nSHAP values explain the uncalibrated model's predicted probability, in percentage points. The calibrator is applied afterwards, so the contributions do not add up exactly to the calibrated PD shown."
+  }
+}
