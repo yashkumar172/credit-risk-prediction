@@ -1,0 +1,31 @@
+# Environment / secrets
+.env
+.venv/
+venv/
+
+# Raw data: Kaggle rules restrict redistribution (SPEC §4.2)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.log

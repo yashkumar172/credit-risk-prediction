@@ -1,0 +1,380 @@
+{
+  "data_sha256": "1bd46da486a5708c58c7b01a034fae2a13b327f6f7b62ea7ba4fe3b5824b24ac",
+  "random_state": 42,
+  "cv_folds": 5,
+  "primary_metric": "pr_auc",
+  "tie_tolerance": 0.005,
+  "calibrated_brier_method": "sigmoid, 5-fold out-of-fold on the validation split",
+  "candidates": [
+    {
+      "candidate": "logistic_regression[none]",
+      "model": "logistic_regression",
+      "imbalance": "none",
+      "cv": {
+        "pr_auc_mean": 0.38263191644595806,
+        "pr_auc_std": 0.01574578360695602,
+        "roc_auc_mean": 0.8547631582916482,
+        "roc_auc_std": 0.006899885423021275,
+        "brier_mean": 0.04991939751175519,
+        "brier_std": 0.0007718258758938995,
+        "pr_auc_folds": [
+          0.38176208364351705,
+          0.3573890664040679,
+          0.40574001225845474,
+          0.37851315330193996,
+          0.38975526662181076
+        ]
+      },
+      "validation": {
+        "pr_auc": 0.39940126821663713,
+        "roc_auc": 0.8645814754988791,
+        "brier": 0.0494333978937845,
+        "mean_predicted": 0.06737689685039319,
+        "observed_rate": 0.06684444444444444
+      },
+      "validation_brier_calibrated": 0.049467403447447114,
+      "fit_time_s": 0.461,
+      "predict_time_s": 0.032,
+      "coefficients": [
+        {
+          "feature": "missingindicator_NumberOfTimes90DaysLate",
+          "coefficient": 2.7397
+        },
+        {
+          "feature": "total_past_due",
+          "coefficient": 0.6433
+        },
+        {
+          "feature": "RevolvingUtilizationOfUnsecuredLines",
+          "coefficient": 0.6166
+        },
+        {
+          "feature": "utilization_over_limit",
+          "coefficient": 0.3265
+        },
+        {
+          "feature": "missingindicator_RevolvingUtilizationOfUnsecuredLines",
+          "coefficient": 0.2808
+        },
+        {
+          "feature": "age",
+          "coefficient": -0.2183
+        },
+        {
+          "feature": "missingindicator_NumberOfDependents",
+          "coefficient": 0.1392
+        },
+        {
+          "feature": "DebtRatio",
+          "coefficient": 0.13
+        },
+        {
+          "feature": "NumberOfTimes90DaysLate",
+          "coefficient": 0.1268
+        },
+        {
+          "feature": "NumberOfTime30-59DaysPastDueNotWorse",
+          "coefficient": -0.0911
+        },
+        {
+          "feature": "NumberOfTime60-89DaysPastDueNotWorse",
+          "coefficient": 0.0544
+        },
+        {
+          "feature": "NumberOfOpenCreditLinesAndLoans",
+          "coefficient": 0.0539
+        },
+        {
+          "feature": "NumberOfDependents",
+          "coefficient": 0.0423
+        },
+        {
+          "feature": "missingindicator_MonthlyIncome",
+          "coefficient": -0.0344
+        },
+        {
+          "feature": "MonthlyIncome",
+          "coefficient": -0.0248
+        },
+        {
+          "feature": "income_per_dependent",
+          "coefficient": 0.0034
+        },
+        {
+          "feature": "NumberRealEstateLoansOrLines",
+          "coefficient": 0.0008
+        }
+      ]
+    },
+    {
+      "candidate": "logistic_regression[class_weight]",
+      "model": "logistic_regression",
+      "imbalance": "class_weight",
+      "cv": {
+        "pr_auc_mean": 0.3800998706147195,
+        "pr_auc_std": 0.015869991445324083,
+        "roc_auc_mean": 0.8549906872623719,
+        "roc_auc_std": 0.006830778052231027,
+        "brier_mean": 0.14516899103690173,
+        "brier_std": 0.0015332360766873027,
+        "pr_auc_folds": [
+          0.3803184485780071,
+          0.355273536611361,
+          0.4031960274111247,
+          0.37349654049520065,
+          0.38821479997790376
+        ]
+      },
+      "validation": {
+        "pr_auc": 0.39718865964836086,
+        "roc_auc": 0.8651986776609932,
+        "brier": 0.14394950102470178,
+        "mean_predicted": 0.33541917930718573,
+        "observed_rate": 0.06684444444444444
+      },
+      "validation_brier_calibrated": 0.049462511493715264,
+      "fit_time_s": 0.519,
+      "predict_time_s": 0.034,
+      "coefficients": [
+        {
+          "feature": "missingindicator_NumberOfTimes90DaysLate",
+          "coefficient": 2.9143
+        },
+        {
+          "feature": "total_past_due",
+          "coefficient": 0.803
+        },
+        {
+          "feature": "RevolvingUtilizationOfUnsecuredLines",
+          "coefficient": 0.6696
+        },
+        {
+          "feature": "utilization_over_limit",
+          "coefficient": 0.3753
+        },
+        {
+          "feature": "missingindicator_RevolvingUtilizationOfUnsecuredLines",
+          "coefficient": 0.3711
+        },
+        {
+          "feature": "age",
+          "coefficient": -0.2542
+        },
+        {
+          "feature": "NumberOfTime30-59DaysPastDueNotWorse",
+          "coefficient": -0.1885
+        },
+        {
+          "feature": "DebtRatio",
+          "coefficient": 0.1523
+        },
+        {
+          "feature": "missingindicator_MonthlyIncome",
+          "coefficient": -0.1342
+        },
+        {
+          "feature": "NumberOfTimes90DaysLate",
+          "coefficient": 0.111
+        },
+        {
+          "feature": "NumberOfOpenCreditLinesAndLoans",
+          "coefficient": 0.0785
+        },
+        {
+          "feature": "NumberOfTime60-89DaysPastDueNotWorse",
+          "coefficient": 0.0472
+        },
+        {
+          "feature": "missingindicator_NumberOfDependents",
+          "coefficient": 0.0459
+        },
+        {
+          "feature": "MonthlyIncome",
+          "coefficient": -0.0388
+        },
+        {
+          "feature": "NumberOfDependents",
+          "coefficient": 0.0367
+        },
+        {
+          "feature": "income_per_dependent",
+          "coefficient": 0.0122
+        },
+        {
+          "feature": "NumberRealEstateLoansOrLines",
+          "coefficient": -0.0027
+        }
+      ]
+    },
+    {
+      "candidate": "random_forest[none]",
+      "model": "random_forest",
+      "imbalance": "none",
+      "cv": {
+        "pr_auc_mean": 0.38965871601655067,
+        "pr_auc_std": 0.013481977657178842,
+        "roc_auc_mean": 0.8574562758744454,
+        "roc_auc_std": 0.006276492848824063,
+        "brier_mean": 0.04947279866342646,
+        "brier_std": 0.0006098129812497881,
+        "pr_auc_folds": [
+          0.3847510385866664,
+          0.36899839859105055,
+          0.4097240563696883,
+          0.3879308074460005,
+          0.3968892790893476
+        ]
+      },
+      "validation": {
+        "pr_auc": 0.4054320061983215,
+        "roc_auc": 0.8645606381965361,
+        "brier": 0.049077602647463775,
+        "mean_predicted": 0.0677849820559938,
+        "observed_rate": 0.06684444444444444
+      },
+      "validation_brier_calibrated": 0.050356268324057436,
+      "fit_time_s": 19.634,
+      "predict_time_s": 0.351
+    },
+    {
+      "candidate": "random_forest[class_weight]",
+      "model": "random_forest",
+      "imbalance": "class_weight",
+      "cv": {
+        "pr_auc_mean": 0.38569416846968047,
+        "pr_auc_std": 0.010961948520498185,
+        "roc_auc_mean": 0.8567808148759288,
+        "roc_auc_std": 0.00594569236058833,
+        "brier_mean": 0.11041053422698714,
+        "brier_std": 0.0012223489232687308,
+        "pr_auc_folds": [
+          0.3809838105799886,
+          0.3689930237163403,
+          0.4025601308583981,
+          0.38639942242310565,
+          0.38953445477056975
+        ]
+      },
+      "validation": {
+        "pr_auc": 0.39915553180753294,
+        "roc_auc": 0.8647479680780129,
+        "brier": 0.10979380116760809,
+        "mean_predicted": 0.2576521601952643,
+        "observed_rate": 0.06684444444444444
+      },
+      "validation_brier_calibrated": 0.049641320234682096,
+      "fit_time_s": 13.331,
+      "predict_time_s": 0.305
+    },
+    {
+      "candidate": "xgboost[none]",
+      "model": "xgboost",
+      "imbalance": "none",
+      "cv": {
+        "pr_auc_mean": 0.3869226335822641,
+        "pr_auc_std": 0.015124021153238265,
+        "roc_auc_mean": 0.8603202514536177,
+        "roc_auc_std": 0.006138042112390729,
+        "brier_mean": 0.04957500323653221,
+        "brier_std": 0.0006953654955206774,
+        "pr_auc_folds": [
+          0.3783603393228221,
+          0.36506497851596226,
+          0.4106172826154571,
+          0.38821660221407195,
+          0.3923539652430073
+        ]
+      },
+      "validation": {
+        "pr_auc": 0.39944882240507057,
+        "roc_auc": 0.8678916139801706,
+        "brier": 0.049231787418220305,
+        "mean_predicted": 0.06670819908911621,
+        "observed_rate": 0.06684444444444444
+      },
+      "validation_brier_calibrated": 0.05085016150467341,
+      "fit_time_s": 3.105,
+      "predict_time_s": 0.118
+    },
+    {
+      "candidate": "xgboost[scale_pos_weight]",
+      "model": "xgboost",
+      "imbalance": "scale_pos_weight",
+      "cv": {
+        "pr_auc_mean": 0.3814978593488264,
+        "pr_auc_std": 0.012715304040935984,
+        "roc_auc_mean": 0.8548975327168403,
+        "roc_auc_std": 0.004793876684783461,
+        "brier_mean": 0.12842264473438264,
+        "brier_std": 0.0016991946503096677,
+        "pr_auc_folds": [
+          0.3776984985371423,
+          0.36134331501926953,
+          0.40090296454273205,
+          0.38442421272987776,
+          0.38312030591511026
+        ]
+      },
+      "validation": {
+        "pr_auc": 0.40078198766758416,
+        "roc_auc": 0.8625668282053724,
+        "brier": 0.12965816475180944,
+        "mean_predicted": 0.29464804310821413,
+        "observed_rate": 0.06684444444444444
+      },
+      "validation_brier_calibrated": 0.04984914848455869,
+      "fit_time_s": 3.183,
+      "predict_time_s": 0.132,
+      "scale_pos_weight": 13.9615
+    },
+    {
+      "candidate": "random_forest[none, tuned]",
+      "model": "random_forest",
+      "imbalance": "none",
+      "cv": {
+        "pr_auc_mean": 0.39326543019250615,
+        "pr_auc_std": 0.013880761058924924,
+        "source": "RandomizedSearchCV (same folds as the untuned candidates)"
+      },
+      "validation": {
+        "pr_auc": 0.4120265031026799,
+        "roc_auc": 0.8694531924520579,
+        "brier": 0.04879249953832784,
+        "mean_predicted": 0.06732888466131427,
+        "observed_rate": 0.06684444444444444
+      },
+      "validation_brier_calibrated": 0.05014205997510078,
+      "fit_time_s": 15.723,
+      "predict_time_s": 0.305,
+      "params": {
+        "n_estimators": 300,
+        "min_samples_leaf": 20,
+        "max_samples": 0.8,
+        "max_features": 0.3,
+        "max_depth": 20
+      },
+      "stage": "tuned",
+      "mean_fit_time_in_cv_s": 121.31
+    }
+  ],
+  "selection": {
+    "imbalance_choice": {
+      "logistic_regression": "none",
+      "random_forest": "none",
+      "xgboost": "none"
+    },
+    "finalists": [
+      "random_forest[none]",
+      "xgboost[none]",
+      "logistic_regression[none]"
+    ],
+    "tied_with_best": [
+      "random_forest[none]"
+    ],
+    "selected_model": "random_forest",
+    "selected_imbalance": "none",
+    "selected_candidate": "random_forest[none]",
+    "reason": "highest validation PR-AUC (0.4054); no other model within 0.005",
+    "final_configuration": "tuned"
+  }
+}

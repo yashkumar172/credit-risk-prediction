@@ -1,0 +1,30 @@
+{
+  "fitted_on": "validation split only (train-fitted pipeline frozen)",
+  "comparison": "5-fold out-of-fold calibration within the validation split",
+  "isotonic_min_relative_gain": 0.01,
+  "validation_out_of_fold": {
+    "raw": {
+      "pr_auc": 0.4120265031026799,
+      "roc_auc": 0.8694531924520579,
+      "brier": 0.04879249953832784,
+      "mean_predicted": 0.06732888466131426,
+      "observed_rate": 0.06684444444444444
+    },
+    "sigmoid": {
+      "pr_auc": 0.41106983842083933,
+      "roc_auc": 0.8683880516248282,
+      "brier": 0.05014205997510078,
+      "mean_predicted": 0.06684130051653209,
+      "observed_rate": 0.06684444444444444
+    },
+    "isotonic": {
+      "pr_auc": 0.4005135039866795,
+      "roc_auc": 0.8673110829367702,
+      "brier": 0.04881316554348701,
+      "mean_predicted": 0.06682992820576736,
+      "observed_rate": 0.06684444444444444
+    }
+  },
+  "chosen_method": "isotonic",
+  "reason": "isotonic out-of-fold Brier 0.04881 is 2.7% lower than sigmoid 0.05014 (threshold 1%)"
+}

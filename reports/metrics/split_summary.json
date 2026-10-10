@@ -1,0 +1,27 @@
+{
+  "data_sha256": "1bd46da486a5708c58c7b01a034fae2a13b327f6f7b62ea7ba4fe3b5824b24ac",
+  "random_state": 42,
+  "scikit_learn_version": "1.9.1",
+  "splits": {
+    "train": {
+      "rows": 105000,
+      "defaults": 7018,
+      "default_rate": 0.06684,
+      "row_id_sha256": "31b887cd264f7970884de9939a50b6af8b80175f9fc0f1ae691e0bb057b7a997"
+    },
+    "validation": {
+      "rows": 22500,
+      "defaults": 1504,
+      "default_rate": 0.06684,
+      "row_id_sha256": "c0617f96f1a3abe8d455c52db07891c8f92c94aebe98b3a2a6242f6f1d464b44",
+      "rows_with_identical_profile_in_train": 126
+    },
+    "test": {
+      "rows": 22500,
+      "defaults": 1504,
+      "default_rate": 0.06684,
+      "row_id_sha256": "729d63cf3f7f18d3eed7564c0a12249cf03f28465b6784538816cab83a618005",
+      "rows_with_identical_profile_in_train": 129
+    }
+  }
+}
