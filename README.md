@@ -1,6 +1,9 @@
 # Credit Risk Prediction & Explainable Default Probability System
 
-> **Status: Phases 1–14 complete; the final review (Phase 15) is pending.**
+> **Status: complete.** All 15 phases are done, and the SPEC §25 acceptance
+> review passed 20 of 21 criteria in full; the 21st (training time) is met for the
+> default run and slightly exceeded by a from-scratch `--retune` run
+> (`DECISIONS.md`, Phase 15).
 > [`SPEC.md`](SPEC.md) is the specification; [`DECISIONS.md`](DECISIONS.md)
 > records every methodology and engineering decision, phase by phase.
 

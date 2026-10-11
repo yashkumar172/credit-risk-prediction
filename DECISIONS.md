@@ -788,3 +788,51 @@ in `reports/figures/eda_*.png`.
     values in common).
 - **Not changed:** code, tests, the model, the metadata and all saved
   reports. The app's text was left as is.
+
+## Phase 15 — Final review: SPEC §25 acceptance checklist (2026-10-11)
+
+Every criterion was checked against fresh evidence from the committed state
+(`df0c53a`), not from earlier notes. Nothing was retrained, tuned or
+re-evaluated.
+
+| # | Criterion | Result | Evidence |
+|---|---|---|---|
+| 1 | Dataset documented, with hash | **Pass** | The SHA-256 is identical in the data file, `config.py`, the model metadata, `split_summary.json`, `model_comparison.json` and `test_metrics.json`, and it appears in the README |
+| 2 | Target defined and described | **Pass** | `SeriousDlqin2yrs` → `default`, binary-validated by the loader. The exact definition is in the README, the app Home page and the metadata |
+| 3 | Split follows the §5.1 roles | **Pass** | 105,000 / 22,500 / 22,500 rows, each with a 6.684% default rate. Train fits, validation calibrates and sets the threshold, test is used once. Row-ID hashes are recorded |
+| 4 | Cleaning and features as pipeline transformers | **Pass** | Artifact steps: `CleaningTransformer` → `FeatureEngineer` → preprocess → `RandomForestClassifier`, inside the calibrator |
+| 5 | Missing values and special codes handled | **Pass** | Cleaning rules (96/98, age < 18, income 0, debt ratio, utilization > 10), native NaN handling and missing indicators for LR. Tested in `test_features.py` |
+| 6 | Imbalance strategies compared | **Pass** | None vs class weights (LR, RF) and vs `scale_pos_weight` (XGBoost), by CV PR-AUC. "None" was chosen for all three |
+| 7 | LR, RF and XGBoost implemented | **Pass** | All three, plus the tuned RF, in `model_comparison.json` |
+| 8 | Model selected by the §12 rule | **Pass** | Re-applying `select_model` to the saved candidates gives `random_forest[none]`, the same as the saved selection |
+| 9 | Tuning on training CV only | **Pass** | `RandomizedSearchCV`, 30 iterations, stratified 5-fold CV on the training split. Kept by the CV rule (0.3933 vs 0.3897) |
+| 10 | Calibrator on validation only; raw vs calibrated compared | **Pass** | Fitted on validation with the train-fitted pipeline frozen. Raw, sigmoid and isotonic were compared out-of-fold, and raw vs calibrated is also reported on test |
+| 11 | Threshold by the cost rule on validation | **Pass** | Recomputed from the saved cost grid: the unique minimum is at 0.17, the chosen threshold and the one in the metadata |
+| 12 | Test set evaluated exactly once | **Pass** | `test_metrics.json` has `forced_rerun: false`, and Git history shows it written in exactly one commit (`766900e`) and never changed |
+| 13 | PR-AUC, ROC-AUC, Brier, precision, recall, F1, confusion matrix, bootstrap CIs | **Pass** | All in `test_metrics.json`, with 1,000-resample CIs for calibrated and raw, the README and the app |
+| 14 | SHAP global and local, with the units note | **Pass (amended)** | Global: 2,000 validation rows. Local: per prediction, in the app. The note is in probability units, not log-odds, because a Random Forest outputs probabilities (SPEC §13.1 amendment, Phase 10) |
+| 15 | Single artifact and metadata | **Pass** | One `.joblib` in `models/`. The metadata has every §15.1 field (features, percentiles, model, calibration, threshold, costs, bands, seed, data hash, timestamp, versions) |
+| 16 | App works, loads artifacts only, validates inputs | **Pass** | 22 `AppTest` tests; a server health check (Phase 12; app code unchanged since); no data access in the app code (grep); hard limits and warnings tested |
+| 17 | `pytest` passes without the Kaggle data | **Pass** | A clean `git archive` export of `df0c53a` with no CSV: **226 passed**. Without the model and reports too (Phase 13, same code): 217 passed, 9 skipped |
+| 18 | Leakage audit documented | **Pass** | README "Leakage audit": all ten §20 questions, with code and test references |
+| 19 | README and `DECISIONS.md` completed | **Pass** | The README has every §22 section; `DECISIONS.md` covers Phases 1–15 |
+| 20 | Repository clean; no raw data committed | **Pass** | Working tree clean. No CSV or raw-data file in any commit of the history. No secrets found. Largest file: the 15.4 MB artifact, within §23's 50 MB |
+| 21 | CPU only; `src.train` in about 30 minutes or less | **Partial** | CPU-only: XGBoost `device="cpu"`, `tree_method="hist"`, and no GPU or deep-learning packages. The time is met for the default `python -m src.train`, which reuses the identical cached search: about 8–9 minutes (245 s measured through tuning in Phase 8, plus about 18 s for calibration and about 236 s for SHAP). A from-scratch `--retune` run is **about 34 minutes**: 1,797 s measured in Phase 8 before calibration and SHAP, plus those steps. That is about 14% over the target (1,797 + ~18 + 236 s ≈ 2,051 s ≈ 34.2 min). It was accepted by the user's Phase 8 decision to cache the search, and it is documented in the README. It was not re-measured end to end, to avoid retraining |
+
+**Result: 20 of 21 criteria pass in full; criterion 21 passes for the default
+run and is slightly exceeded by a from-scratch `--retune` run.**
+
+**Known, documented limitations (non-blocking):**
+- **Isotonic calibration** was chosen by the pre-set rule. It did not improve
+  Brier on test, and it lowered PR-AUC from 0.411 to 0.392 (Phases 9, 11).
+  This is reported, not changed after seeing test results.
+- **The threshold is slightly optimistic** (+1.8% cost out-of-fold, Phase 9).
+- **The committed PR-curve figure** still shows the overlapping baseline
+  label. The code is fixed, but the figure was not redrawn, to avoid
+  re-scoring the test set (Phase 11).
+- **The app's contribution chart** truncates long feature names; this is
+  cosmetic.
+- **Markdown style lints** (table-pipe spacing, bold text used as headings)
+  in the README; GitHub renders the file correctly.
+- **The optional §14.7 (cloud deployment) and §21 (fairness experiments)
+  items were not done**, and the README says so.
