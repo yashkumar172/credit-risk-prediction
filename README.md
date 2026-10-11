@@ -1,6 +1,6 @@
 # Credit Risk Prediction & Explainable Default Probability System
 
-> **Status: in development (Phase 12 — Streamlit application complete).** Results,
+> **Status: in development (Phase 13 — test suite complete).** Results,
 > figures and the full write-up are added as later phases are completed. See
 > [`SPEC.md`](SPEC.md) for the full specification and
 > [`DECISIONS.md`](DECISIONS.md) for the decisions made so far.
@@ -443,7 +443,37 @@ python -m src.evaluate --final --force  # re-run only with a reason; record it i
 ## Tests
 
 ```powershell
-pytest
+pytest              # 226 tests, about 6-9 minutes on a laptop CPU
+pytest -rs          # also list skipped tests and why
 ```
 
-The tests use generated synthetic data and do not need the Kaggle file.
+The suite **does not need the Kaggle file or the trained model**. Tests use a
+generated synthetic dataset
+([`tests/fixtures/make_synthetic_data.py`](tests/fixtures/make_synthetic_data.py)).
+It has the real file's schema and its data problems: missing income and
+dependents, 96/98 codes, zero income, zero dependents, age 0, and implausible
+utilization. Tests that need a model train a small one on that data
+([`make_synthetic_artifact.py`](tests/fixtures/make_synthetic_artifact.py)).
+Every test that writes output uses temporary folders, so running the suite
+never changes `models/` or `reports/`.
+
+Six tests use the real trained model or reports. They are **skipped** when
+those files are absent (9 skips, counting parameterized cases). Both
+situations were checked on a clean export of the repository:
+
+| Situation | Result |
+|---|---|
+| No Kaggle file (fresh clone) | 226 passed |
+| No Kaggle file, no model, no reports | 217 passed, 9 skipped |
+
+| Test file | Covers |
+|---|---|
+| `test_data.py` | Schema validation (missing or extra columns), binary target, ID column dropped, split reproducibility |
+| `test_features.py` | Cleaning rules (96/98 codes, age < 18, zero income, utilization), each engineered feature, no `inf`, target never a feature |
+| `test_preprocessing.py` | Statistics learned from training data only, missing indicators, probabilities in [0, 1] |
+| `test_train.py`, `test_tune.py`, `test_resume.py` | Selection and imbalance rules, tuning cache, `--from-phase 9`; the test split is never touched |
+| `test_calibration.py` | Calibration rule, threshold choice, saved artifact |
+| `test_explain.py` | SHAP additivity (RF, XGBoost, LR), local and global explanations, the invented example borrower |
+| `test_final_evaluation.py` | One-time test evaluation: refusal to re-run, data and split checks, bootstrap intervals |
+| `test_predict.py` | Input limits, warnings, PD, band and flag, NaN income and dependents |
+| `test_app.py` | Every app page (headless `AppTest`), form fields match the metadata in order, the end-to-end prediction, no access to the raw data |

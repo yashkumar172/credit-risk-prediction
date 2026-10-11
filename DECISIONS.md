@@ -684,3 +684,44 @@ in `reports/figures/eda_*.png`.
   - A shared fixture, `tests/fixtures/make_synthetic_artifact.py`.
 - **Not done in this phase:** screenshots for the README. They need the app
   running in a browser and belong with the final documentation (Phase 14).
+
+## Phase 13 — Test suite (2026-10-11)
+
+- **The audit against SPEC §19 found no gaps.** Every listed requirement has
+  tests:
+  - **§19.1:** the synthetic fixture has missing values, 96/98 codes, zero
+    income, zero dependents and both classes. Real-artifact tests are
+    skipped when the artifact is absent.
+  - **§19.2:** schema validation rejects missing and extra columns; the
+    target is binary; the ID column is dropped.
+  - **§19.3:** each engineered feature is tested on hand-built rows; codes
+    and age < 18 become NaN; there is no `inf`; the target never appears
+    among the features.
+  - **§19.4:** probabilities lie in [0, 1]; NaN income and dependents are
+    handled; band and flag agree with config; the real artifact predicts.
+  - **§19.5:** the app schema test.
+  - **§19.6:** the end-to-end path, both in `src` and through the app.
+  - No new tests were needed.
+- **"No Kaggle data needed" was verified, not just asserted.** The
+  committed tree was exported with `git archive` into two fresh temporary
+  folders and the suite was run there with the project's virtual
+  environment. The code imported from the copy, and the Kaggle file was
+  absent. The project folder was not modified.
+  - As committed (no Kaggle file): **226 passed**.
+  - Also without `models/credit_risk_pipeline.joblib`,
+    `model_metadata.json` and `reports/metrics/*.json`: **217 passed, 9
+    skipped**. Each skip is a real-artifact test with the reason "trained
+    artifact … not present".
+- **In the project folder:** 226 passed in about 7.5 minutes. Run with
+  warnings enabled, there are 3 warnings, all `PendingDeprecationWarning`s
+  raised by SHAP's own colour-map code on import (`shap/plots/colors`).
+  None comes from project code. On exit, Streamlit's `AppTest` can also
+  print a `ResourceWarning` about a temporary directory it creates
+  internally and cleans up implicitly. That is harmless, and the project
+  creates no temporary directories itself.
+- **No test writes to `models/` or `reports/`.** Every test that produces
+  files redirects the config paths to temporary folders. The SHA-256 hashes
+  of the model and all reports were unchanged after the runs.
+- **Runtime:** about 6–9 minutes, depending on machine load. Most of it is
+  small model fits on synthetic data. This is acceptable for a full suite;
+  no tests were removed or shortened to save time.
