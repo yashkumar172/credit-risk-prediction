@@ -29,3 +29,11 @@ desktop.ini
 # Temporary files
 *.tmp
 *.log
+# Claude Code transcripts
+transcript.md
+transcript.html
+transcript_before_shutdown.md
+transcript_after_shutdown_backup.md
+
+# Personal interview preparation
+INTERVIEW_GUIDE.md
